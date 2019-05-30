@@ -28,8 +28,10 @@ RSpec.describe DynamoLock::Client do
       )
     end
 
+    locked = false
     client.with_lock('test') do
-      p client.dynamo_client.scan(table_name: client.table_name)
+      locked = true
     end
+    expect(locked).to be(true)
   end
 end

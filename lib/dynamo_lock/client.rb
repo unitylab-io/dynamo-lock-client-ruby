@@ -52,7 +52,7 @@ module DynamoLock
       dynamo_client.put_item(
         table_name: table_name,
         item: {
-          id: name.to_s,
+          id: lock_name_for(name),
           lock_owner: lock_owner_id,
           expires: Time.now.utc.to_i + (ex || default_expires_after).to_i
         },
@@ -71,7 +71,7 @@ module DynamoLock
     def heartbeat(name, ex: nil)
       dynamo_client.update_item(
         table_name: table_name,
-        key: { id: name.to_s },
+        key: { id: lock_name_for(name) },
         update_expression: 'SET expires = :expires',
         condition_expression: \
           'attribute_exists(expires) AND expires > :now AND lock_owner = :owner',
@@ -89,19 +89,25 @@ module DynamoLock
     def release(name)
       dynamo_client.update_item(
         table_name: table_name,
-        key: { id: name.to_s },
+        key: { id: lock_name_for(name) },
         update_expression: 'SET expires = :expires',
         condition_expression: \
           'attribute_exists(expires) AND expires >= :now AND lock_owner = :owner',
         expression_attribute_values: {
           ':expires' => nil,
-          ':owner' => lock_owner_id,
+          ':owner' => nil,
           ':now' => Time.now.utc.to_i
         }
       )
       true
     rescue Aws::DynamoDB::Errors::ConditionalCheckFailedException
       false
+    end
+
+    private
+
+    def lock_name_for(name)
+      name.to_s
     end
   end
 end
