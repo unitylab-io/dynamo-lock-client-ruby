@@ -1,6 +1,12 @@
 require 'bundler/setup'
 require 'dynamo-lock-client'
 
+DynamoLock.configure do |config|
+  config.endpoint = ENV.fetch('DYNAMODB_URL') if ENV.key?('DYNAMODB_URL')
+end
+
+DynamoLock.setup_table!
+
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = ".rspec_status"

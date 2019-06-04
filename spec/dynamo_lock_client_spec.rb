@@ -19,14 +19,7 @@ RSpec.describe DynamoLock::Client do
   end
 
   it 'should create a lock' do
-    client = DynamoLock::Client.new do |config|
-      config.table_name = 'demo'
-      config.dynamo_client = Aws::DynamoDB::Client.new(
-        endpoint: ENV.fetch('DYNAMODB_URL'),
-        access_key_id: 'foo',
-        secret_access_key: 'bar'
-      )
-    end
+    client = DynamoLock::Client.new
 
     locked = false
     client.with_lock('test') do
